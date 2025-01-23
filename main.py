@@ -1,42 +1,14 @@
 from PIL import Image
 import sys
 import os
-from datetime import datetime
 import urllib.request
 import base64
 import json
-import time
 import os
+import dotenv
 
-webui_server_url = "http://127.0.0.1:3000"
-
-
-def encode_file_to_base64(path):
-    with open(path, "rb") as file:
-        return base64.b64encode(file.read()).decode("utf-8")
-
-
-def decode_and_save_base64(base64_str, save_path):
-    with open(save_path, "wb") as file:
-        file.write(base64.b64decode(base64_str))
-
-
-def call_api(api_endpoint, **payload):
-    data = json.dumps(payload).encode("utf-8")
-    request = urllib.request.Request(
-        f"{webui_server_url}/{api_endpoint}",
-        headers={"Content-Type": "application/json"},
-        data=data,
-    )
-    response = urllib.request.urlopen(request)
-    return json.loads(response.read().decode("utf-8"))
-
-
-def call_img2img_api(save_path, **payload):
-    response = call_api("sdapi/v1/img2img", **payload)
-    for index, image in enumerate(response.get("images")):
-        save_path = os.path.join(save_path, f"img2img-{datetime.fromtimestamp(time.time()).strftime("%Y%m%d-%H%M%S")}-{index}.png")
-        decode_and_save_base64(image, save_path)
+dotenv.load_dotenv()
+webui_server_url = os.getenv("WEBUI_SERVER_URL")
 
 
 def create_prepared_image(image_path, size_x, size_y, pos_x, pos_y):
@@ -66,22 +38,86 @@ def create_prepared_image(image_path, size_x, size_y, pos_x, pos_y):
         print(f"오류 발생: {e}")
 
 
+def encode_file_to_base64(path):
+    with open(path, "rb") as file:
+        return base64.b64encode(file.read()).decode("utf-8")
+
+
+def decode_and_save_base64(base64_str, save_path):
+    with open(save_path, "wb") as file:
+        file.write(base64.b64decode(base64_str))
+
+
+def call_api(api_endpoint, **payload):
+    data = json.dumps(payload).encode("utf-8")
+    request = urllib.request.Request(
+        f"{webui_server_url}/{api_endpoint}",
+        headers={"Content-Type": "application/json"},
+        data=data,
+    )
+    response = urllib.request.urlopen(request)
+    return json.loads(response.read().decode("utf-8"))
+
+
+def call_img2img_api(save_path, **payload):
+    response = call_api("sdapi/v1/img2img", **payload)
+    for index, image in enumerate(response.get("images")):
+        decode_and_save_base64(image, save_path + f"_{index}.png")
+
+
 def generate_image(save_path):
     init_images = [
         encode_file_to_base64(r"./tmp/img1.png"),
     ]
-    batch_size = 2
     payload = {
-        "prompt": "1girl, blue hair",
-        "seed": 1,
-        "steps": 20,
-        "width": 512,
+        "alwayson_scripts": {
+            "Sampler": {"args": [20, "DPM++ 2M", "Karras"]},
+            "Seed": {"args": [-1, False, -1, 0, 0, 0]},
+        },
+        "batch_size": 4,
+        "cfg_scale": 7,
+        "comments": {},
+        "denoising_strength": 0.55,
+        "disable_extra_networks": False,
+        "do_not_save_grid": False,
+        "do_not_save_samples": False,
         "height": 512,
-        "denoising_strength": 0.5,
-        "n_iter": 1,
+        "image_cfg_scale": 1.5,
         "init_images": init_images,
-        "batch_size": batch_size if len(init_images) == 1 else len(init_images),
+        "initial_noise_multiplier": 1.0,
+        "inpaint_full_res": 0,
+        "inpaint_full_res_padding": 32,
+        "inpainting_fill": 0,
+        "inpainting_mask_invert": 1,
         "mask": encode_file_to_base64("./tmp/img2.png"),
+        "mask_blur": 4,
+        "mask_blur_x": 4,
+        "mask_blur_y": 4,
+        "mask_round": True,
+        "n_iter": 1,
+        "negative_prompt": "tray, bad eyes, sketches, glans, crop, out of frame, jpeg artifacts, ugly painting, cartoon, doll, anime, (worst quality,low quality,normal quality:2), lowres, ((monochrome)), ((grayscale)), skin spots, watermark,repetitive, sickly, mutilated, mutated, blurred, dehydrated",
+        "override_settings": {},
+        "override_settings_restore_afterwards": True,
+        "prompt": "((in the office, laptop on the table)), modern, woody, realistic photo, raw photo, high resolution, high definition, finely detailed, masterpiece, best quality, 4k Unity CG Wallpaper",
+        "resize_mode": 1,
+        "restore_faces": False,
+        "s_churn": 0.0,
+        "s_min_uncond": 0.0,
+        "s_noise": 1,
+        "s_tmin": 0,
+        "sampler_name": "DPM++ 2M",
+        "scheduler": "Karras",
+        "script_args": [],
+        "seed": -1,
+        "seed_enable_extras": True,
+        "seed_resize_from_h": -1,
+        "seed_resize_from_w": -1,
+        "steps": 20,
+        "styles": [],
+        "subseed": -1,
+        "subseed_strength": 0,
+        "tiling": False,
+        "width": 768,
     }
     call_img2img_api(save_path, **payload)
 
@@ -126,4 +162,3 @@ if __name__ == "__main__":
     except ValueError:
         print("오류: 올바른 숫자 값을 입력하세요.")
         sys.exit(1)
-
