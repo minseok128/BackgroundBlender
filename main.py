@@ -65,7 +65,7 @@ def call_img2img_api(save_path, **payload):
         decode_and_save_base64(image, save_path + f"_{index}.png")
 
 
-def generate_image(save_path):
+def generate_image(bg_prompt, save_path):
     init_images = [
         encode_file_to_base64(r"./tmp/img1.png"),
     ]
@@ -98,7 +98,7 @@ def generate_image(save_path):
         "negative_prompt": "tray, bad eyes, sketches, glans, crop, out of frame, jpeg artifacts, ugly painting, cartoon, doll, anime, (worst quality,low quality,normal quality:2), lowres, ((monochrome)), ((grayscale)), skin spots, watermark,repetitive, sickly, mutilated, mutated, blurred, dehydrated",
         "override_settings": {},
         "override_settings_restore_afterwards": True,
-        "prompt": "((in the office, laptop on the table)), modern, woody, realistic photo, raw photo, high resolution, high definition, finely detailed, masterpiece, best quality, 4k Unity CG Wallpaper",
+        "prompt": bg_prompt,
         "resize_mode": 1,
         "restore_faces": False,
         "s_churn": 0.0,
@@ -131,7 +131,7 @@ if __name__ == "__main__":
 
     try:
         image_caption = (
-            input("제품에 대한 설명을 입력하세요 (기본: wine glass): ") or "wine glass"
+            input("제품에 대한 설명을 입력하세요 (기본: lap top): ") or "lap top"
         )
 
         size_x_input = input("생성할 이미지의 너비를 입력하세요 (기본: 1024): ")
@@ -151,13 +151,12 @@ if __name__ == "__main__":
         )
 
         bg_prompt = (
-            input("제품의 배경에 대해서 묘사하세요 (기본: 해변가): ")
-            or image_caption
-            + " on a sandy beach, clear blue sky, photorealistic, 8k, highly detailed, trending on artstation"
+            input("제품의 배경에 대해서 묘사하세요 (기본: 사무실 나무 테이블): ")
+            or f"((in the office, {image_caption} on the table)), modern, woody, realistic photo, raw photo, high resolution, high definition, finely detailed, masterpiece, best quality, 4k Unity CG Wallpaper"
         )
 
         create_prepared_image(image_path, size_x, size_y, pos_x, pos_y)
-        generate_image(save_path)
+        generate_image(bg_prompt, save_path)
 
     except ValueError:
         print("오류: 올바른 숫자 값을 입력하세요.")
