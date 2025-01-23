@@ -34,6 +34,10 @@ if __name__ == "__main__":
     image_path = sys.argv[1]
 
     try:
+        image_caption = (
+            input("제품에 대한 설명을 입력하세요 (기본: wine glass): ") or "wine glass"
+        )
+
         size_x_input = input("생성할 이미지의 너비를 입력하세요 (기본: 1024): ")
         size_x = int(size_x_input) if size_x_input else 1024
 
@@ -48,6 +52,12 @@ if __name__ == "__main__":
 
         save_path = (
             input("저장할 파일 이름을 입력하세요 (기본: output.png): ") or "output.png"
+        )
+
+        bg_prompt = (
+            input("제품의 배경에 대해서 묘사하세요 (기본: 해변가): ")
+            or image_caption
+            + " on a sandy beach, clear blue sky, photorealistic, 8k, highly detailed, trending on artstation"
         )
     except ValueError:
         print("오류: 올바른 숫자 값을 입력하세요.")
