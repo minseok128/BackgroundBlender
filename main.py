@@ -1,13 +1,17 @@
 from PIL import Image
 import sys
+import os
 
 
 def create_image(image_path, size_x, size_y, pos_x, pos_y, save_path):
+    temp_dir = "./tmp/"
+    os.makedirs(temp_dir, exist_ok=True)
+
     try:
         input_image = Image.open(image_path).convert("RGBA")
         new_image = Image.new("RGBA", (size_x, size_y), (0, 0, 0, 0))
         new_image.paste(input_image, (pos_x, pos_y), input_image)
-        new_image.save("img1.png", "PNG")
+        new_image.save(os.path.join(temp_dir, "img1.png"), "PNG")
 
         pixels = new_image.getdata()
         masked_pixels = []
@@ -18,7 +22,7 @@ def create_image(image_path, size_x, size_y, pos_x, pos_y, save_path):
                 masked_pixels.append((0, 0, 0, 0))
         masked_image = Image.new("RGBA", new_image.size)
         masked_image.putdata(masked_pixels)
-        masked_image.save("img2.png", "PNG")
+        masked_image.save(os.path.join(temp_dir, "img2.png"), "PNG")
 
     except FileNotFoundError:
         print(f"오류: 파일 {image_path}를 찾을 수 없습니다.")
