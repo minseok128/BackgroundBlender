@@ -1,6 +1,7 @@
 # BackgroundBlender
 
 ![KakaoTalk_Photo_2025-01-23-22-38-41](https://github.com/user-attachments/assets/2e44bc5a-eeec-4cdb-934a-d08e594817be)
+<img width="577" alt="image" src="https://github.com/user-attachments/assets/040afebc-6f0a-4197-bbdb-addae8e1d80b" />
 
 |result|images|
 |--|--|
